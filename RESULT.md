@@ -192,3 +192,10 @@ without_serena と比較
   - この結果、output token が増えたものと思われる。
 - 今回は比較的簡単な機能追加だったので、serena がない場合でもトークン数は少なく済む内容だったと考えられる。
   - より複雑かつ規模の大きいプロジェクトでは、serena の恩恵を受けやすくなり、結果的にトークン数が削減されると考えられる。
+
+#### コミットの比較
+
+[without-serena](https://github.com/mgr-kb/serena-mcp-sandbox/commit/8414dde33c7e2799c556e70dc85ed5f08f2c8e16)
+[use-serena](https://github.com/mgr-kb/serena-mcp-sandbox/commit/ed22d3b7d1d8b8ab320785ee6b9a8946fc089f97)
+
+主な差分は **sort のロジックをコンポーネント内に入れる or hooks 内に入れてるか** くらい。
