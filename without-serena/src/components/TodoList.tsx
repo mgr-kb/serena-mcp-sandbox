@@ -1,5 +1,5 @@
-import React from 'react';
-import type { Todo, CreateTodoRequest, UpdateTodoRequest, TodoFilter } from '../types/todo';
+import React, { useState, useMemo } from 'react';
+import type { Todo, CreateTodoRequest, UpdateTodoRequest, TodoFilter, Priority } from '../types/todo';
 import { TodoForm } from './TodoForm';
 import { TodoItem } from './TodoItem';
 import { TodoFilterComponent } from './TodoFilter';
@@ -37,6 +37,43 @@ export const TodoList: React.FC<TodoListProps> = ({
   onMarkAllCompleted,
   onRefresh,
 }) => {
+  const [sortBy, setSortBy] = useState<'default' | 'priority' | 'created' | 'updated'>('default');
+
+  const getPriorityOrder = (priority: Priority): number => {
+    switch (priority) {
+      case 'high':
+        return 3;
+      case 'medium':
+        return 2;
+      case 'low':
+        return 1;
+      default:
+        return 2;
+    }
+  };
+
+  const sortedTodos = useMemo(() => {
+    if (sortBy === 'default') {
+      return todos;
+    }
+
+    return [...todos].sort((a, b) => {
+      switch (sortBy) {
+        case 'priority': {
+          const priorityDiff = getPriorityOrder(b.priority) - getPriorityOrder(a.priority);
+          if (priorityDiff !== 0) return priorityDiff;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        case 'created':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'updated':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        default:
+          return 0;
+      }
+    });
+  }, [todos, sortBy]);
+
   const handleRefresh = async () => {
     try {
       await onRefresh();
@@ -76,7 +113,7 @@ export const TodoList: React.FC<TodoListProps> = ({
       );
     }
 
-    if (todos.length === 0) {
+    if (sortedTodos.length === 0) {
       const isFiltered = filter.type !== 'all' || filter.searchQuery;
       
       return (
@@ -101,7 +138,7 @@ export const TodoList: React.FC<TodoListProps> = ({
 
     return (
       <div className="space-y-3">
-        {todos.map((todo) => (
+        {sortedTodos.map((todo) => (
           <TodoItem
             key={todo.id}
             todo={todo}
@@ -137,11 +174,31 @@ export const TodoList: React.FC<TodoListProps> = ({
         disabled={loading}
       />
 
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex items-center gap-4">
+          <label htmlFor="sort-select" className="text-sm font-medium text-gray-700">
+            並び順:
+          </label>
+          <select
+            id="sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'default' | 'priority' | 'created' | 'updated')}
+            disabled={loading}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="default">デフォルト</option>
+            <option value="priority">優先度順</option>
+            <option value="created">作成日順</option>
+            <option value="updated">更新日順</option>
+          </select>
+        </div>
+      </div>
+
       <div className="bg-gray-50 rounded-lg p-6">
         {renderContent()}
       </div>
 
-      {!loading && !error && todos.length > 0 && (
+      {!loading && !error && sortedTodos.length > 0 && (
         <div className="text-center">
           <button
             onClick={handleRefresh}

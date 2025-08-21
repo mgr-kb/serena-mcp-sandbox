@@ -12,7 +12,7 @@ export interface Todo {
 
 export type CreateTodoRequest = Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>;
 
-export type UpdateTodoRequest = Partial<Pick<Todo, 'title' | 'description' | 'completed'>>;
+export type UpdateTodoRequest = Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority'>>;
 
 export type FilterType = 'all' | 'active' | 'completed';
 

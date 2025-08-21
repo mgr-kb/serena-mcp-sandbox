@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Todo, UpdateTodoRequest } from '../types/todo';
+import type { Todo, UpdateTodoRequest, Priority } from '../types/todo';
 
 interface TodoItemProps {
   todo: Todo;
@@ -19,6 +19,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const [editDescription, setEditDescription] = useState(todo.description || '');
+  const [editPriority, setEditPriority] = useState(todo.priority);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +40,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
     setIsEditing(true);
     setEditTitle(todo.title);
     setEditDescription(todo.description || '');
+    setEditPriority(todo.priority);
     setError(null);
   };
 
@@ -46,6 +48,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
     setIsEditing(false);
     setEditTitle(todo.title);
     setEditDescription(todo.description || '');
+    setEditPriority(todo.priority);
     setError(null);
   };
 
@@ -62,6 +65,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
       await onUpdateTodo(todo.id, {
         title: editTitle.trim(),
         description: editDescription.trim() || undefined,
+        priority: editPriority,
       });
       setIsEditing(false);
     } catch (err) {
@@ -98,6 +102,32 @@ export const TodoItem: React.FC<TodoItemProps> = ({
     }).format(date);
   };
 
+  const getPriorityLabel = (priority: Priority) => {
+    switch (priority) {
+      case 'high':
+        return '高';
+      case 'medium':
+        return '中';
+      case 'low':
+        return '低';
+      default:
+        return '中';
+    }
+  };
+
+  const getPriorityColor = (priority: Priority) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-yellow-100 text-yellow-800';
+    }
+  };
+
   const isItemDisabled = disabled || isUpdating;
 
   if (isEditing) {
@@ -123,6 +153,17 @@ export const TodoItem: React.FC<TodoItemProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 resize-vertical"
             maxLength={500}
           />
+
+          <select
+            value={editPriority}
+            onChange={(e) => setEditPriority(e.target.value as Priority)}
+            disabled={isItemDisabled}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+          >
+            <option value="high">高</option>
+            <option value="medium">中</option>
+            <option value="low">低</option>
+          </select>
 
           {error && (
             <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-md p-2">
@@ -168,9 +209,14 @@ export const TodoItem: React.FC<TodoItemProps> = ({
         </button>
 
         <div className="flex-1 min-w-0">
-          <h3 className={`text-lg font-medium ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-            {todo.title}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className={`text-lg font-medium ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+              {todo.title}
+            </h3>
+            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(todo.priority)}`}>
+              {getPriorityLabel(todo.priority)}
+            </span>
+          </div>
           
           {todo.description && (
             <p className={`mt-1 text-sm ${todo.completed ? 'line-through text-gray-400' : 'text-gray-600'}`}>
