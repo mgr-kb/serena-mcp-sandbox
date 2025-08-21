@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Todo, CreateTodoRequest, UpdateTodoRequest, TodoFilter } from '../types/todo';
+import type { Todo, CreateTodoRequest, UpdateTodoRequest, TodoFilter, SortType } from '../types/todo';
 import { TodoForm } from './TodoForm';
 import { TodoItem } from './TodoItem';
 import { TodoFilterComponent } from './TodoFilter';
@@ -9,9 +9,11 @@ interface TodoListProps {
   loading: boolean;
   error: string | null;
   filter: TodoFilter;
+  sortBy: SortType;
   activeTodosCount: number;
   completedTodosCount: number;
   onFilterChange: (filter: TodoFilter) => void;
+  onSortChange: (sortBy: SortType) => void;
   onAddTodo: (todoData: CreateTodoRequest) => Promise<void>;
   onUpdateTodo: (id: string, updateData: UpdateTodoRequest) => Promise<void>;
   onDeleteTodo: (id: string) => Promise<void>;
@@ -26,9 +28,11 @@ export const TodoList: React.FC<TodoListProps> = ({
   loading,
   error,
   filter,
+  sortBy,
   activeTodosCount,
   completedTodosCount,
   onFilterChange,
+  onSortChange,
   onAddTodo,
   onUpdateTodo,
   onDeleteTodo,
@@ -136,6 +140,25 @@ export const TodoList: React.FC<TodoListProps> = ({
         onMarkAllCompleted={onMarkAllCompleted}
         disabled={loading}
       />
+
+      <div className="bg-white rounded-lg shadow-md p-4">
+        <div className="flex items-center gap-4">
+          <label htmlFor="sort-select" className="text-sm font-medium text-gray-700">
+            並び順:
+          </label>
+          <select
+            id="sort-select"
+            value={sortBy}
+            onChange={(e) => onSortChange(e.target.value as SortType)}
+            disabled={loading}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="priority">優先度</option>
+            <option value="createdAt">作成日時</option>
+            <option value="title">タイトル</option>
+          </select>
+        </div>
+      </div>
 
       <div className="bg-gray-50 rounded-lg p-6">
         {renderContent()}

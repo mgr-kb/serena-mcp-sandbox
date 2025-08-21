@@ -7,9 +7,11 @@ function App() {
     loading,
     error,
     filter,
+    sortBy,
     activeTodosCount,
     completedTodosCount,
     setFilter,
+    setSortBy,
     addTodo,
     updateTodo,
     deleteTodo,
@@ -26,9 +28,11 @@ function App() {
         loading={loading}
         error={error}
         filter={filter}
+        sortBy={sortBy}
         activeTodosCount={activeTodosCount}
         completedTodosCount={completedTodosCount}
         onFilterChange={setFilter}
+        onSortChange={setSortBy}
         onAddTodo={addTodo}
         onUpdateTodo={updateTodo}
         onDeleteTodo={deleteTodo}

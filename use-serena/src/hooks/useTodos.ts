@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Todo, CreateTodoRequest, UpdateTodoRequest, TodoFilter } from '../types/todo';
+import type { Todo, CreateTodoRequest, UpdateTodoRequest, TodoFilter, SortType } from '../types/todo';
 import { todoService } from '../db/services/todoService';
 
 interface UseTodosReturn {
@@ -7,9 +7,11 @@ interface UseTodosReturn {
   loading: boolean;
   error: string | null;
   filter: TodoFilter;
+  sortBy: SortType;
   activeTodosCount: number;
   completedTodosCount: number;
   setFilter: (filter: TodoFilter) => void;
+  setSortBy: (sortBy: SortType) => void;
   addTodo: (todoData: CreateTodoRequest) => Promise<void>;
   updateTodo: (id: string, updateData: UpdateTodoRequest) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
@@ -24,6 +26,7 @@ export const useTodos = (): UseTodosReturn => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<TodoFilter>({ type: 'all' });
+  const [sortBy, setSortBy] = useState<SortType>('priority');
   const [activeTodosCount, setActiveTodosCount] = useState(0);
   const [completedTodosCount, setCompletedTodosCount] = useState(0);
 
@@ -31,6 +34,25 @@ export const useTodos = (): UseTodosReturn => {
     const message = err instanceof Error ? err.message : `Unknown error during ${action}`;
     setError(message);
     console.error(`Error ${action}:`, err);
+  }, []);
+
+  const sortTodos = useCallback((todosToSort: Todo[], sortType: SortType): Todo[] => {
+    return [...todosToSort].sort((a, b) => {
+      switch (sortType) {
+        case 'priority': {
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+          if (priorityDiff !== 0) return priorityDiff;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        case 'createdAt':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'title':
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
   }, []);
 
   const updateCounts = useCallback(async () => {
@@ -51,14 +73,15 @@ export const useTodos = (): UseTodosReturn => {
       setLoading(true);
       setError(null);
       const filteredTodos = await todoService.filterTodos(filter);
-      setTodos(filteredTodos);
+      const sortedTodos = sortTodos(filteredTodos, sortBy);
+      setTodos(sortedTodos);
       await updateCounts();
     } catch (err) {
       handleError(err, 'loading todos');
     } finally {
       setLoading(false);
     }
-  }, [filter, handleError, updateCounts]);
+  }, [filter, sortBy, handleError, updateCounts, sortTodos]);
 
   const refreshTodos = useCallback(async () => {
     await loadTodos();
@@ -152,9 +175,11 @@ export const useTodos = (): UseTodosReturn => {
     loading,
     error,
     filter,
+    sortBy,
     activeTodosCount,
     completedTodosCount,
     setFilter: setFilterWithRefresh,
+    setSortBy,
     addTodo,
     updateTodo,
     deleteTodo,

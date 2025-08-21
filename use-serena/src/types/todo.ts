@@ -3,15 +3,18 @@ export interface Todo {
   title: string;
   description?: string;
   completed: boolean;
+  priority: 'high' | 'medium' | 'low';
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type CreateTodoRequest = Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>;
 
-export type UpdateTodoRequest = Partial<Pick<Todo, 'title' | 'description' | 'completed'>>;
+export type UpdateTodoRequest = Partial<Pick<Todo, 'title' | 'description' | 'completed' | 'priority'>>;
 
 export type FilterType = 'all' | 'active' | 'completed';
+
+export type SortType = 'priority' | 'createdAt' | 'title';
 
 export interface TodoFilter {
   type: FilterType;

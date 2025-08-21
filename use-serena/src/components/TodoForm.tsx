@@ -9,6 +9,7 @@ interface TodoFormProps {
 export const TodoForm: React.FC<TodoFormProps> = ({ onAddTodo, disabled = false }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,10 +29,12 @@ export const TodoForm: React.FC<TodoFormProps> = ({ onAddTodo, disabled = false 
         title: title.trim(),
         description: description.trim() || undefined,
         completed: false,
+        priority,
       });
       
       setTitle('');
       setDescription('');
+      setPriority('medium');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'TODOの追加に失敗しました';
       setError(message);
@@ -75,6 +78,23 @@ export const TodoForm: React.FC<TodoFormProps> = ({ onAddTodo, disabled = false 
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed resize-vertical"
             maxLength={500}
           />
+        </div>
+
+        <div>
+          <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
+            優先度
+          </label>
+          <select
+            id="priority"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as 'high' | 'medium' | 'low')}
+            disabled={isFormDisabled}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="high">高</option>
+            <option value="medium">中</option>
+            <option value="low">小</option>
+          </select>
         </div>
 
         {error && (

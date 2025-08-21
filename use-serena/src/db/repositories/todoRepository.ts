@@ -10,6 +10,7 @@ interface SerializedTodo {
   title: string;
   description?: string;
   completed: number; // 0 or 1
+  priority: 'high' | 'medium' | 'low';
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
 }
